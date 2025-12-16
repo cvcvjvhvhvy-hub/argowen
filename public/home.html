@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الرئيسية - إدارة الطلبات</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">إدارة الطلبات</a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text me-3" id="userName"></span>
+                <button class="btn btn-outline-light" onclick="logout()">خروج</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div id="grocerySection" class="d-none">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3>فواتيري</h3>
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createInvoiceModal">
+                    إنشاء فاتورة جديدة
+                </button>
+            </div>
+            <div id="groceryInvoices" class="row"></div>
+        </div>
+
+        <div id="merchantSection" class="d-none">
+            <h3 class="mb-4">الفواتير المتاحة للتسعير</h3>
+            <div id="merchantInvoices" class="row"></div>
+        </div>
+
+        <div id="adminSection" class="d-none">
+            <ul class="nav nav-tabs mb-4">
+                <li class="nav-item">
+                    <a class="nav-link active" data-bs-toggle="tab" href="#allInvoices">جميع الفواتير</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#allUsers">المستخدمون</a>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="allInvoices">
+                    <div id="adminInvoices" class="row"></div>
+                </div>
+                <div class="tab-pane fade" id="allUsers">
+                    <div id="usersList" class="row"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="createInvoiceModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">إنشاء فاتورة جديدة</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="invoiceForm">
+                        <div class="mb-3">
+                            <label class="form-label">رقم الهاتف</label>
+                            <input type="tel" class="form-control" id="invoicePhone">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">العنوان</label>
+                            <textarea class="form-control" id="invoiceAddress" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">المنتجات</label>
+                            <div id="itemsList">
+                                <div class="row mb-2 item-row">
+                                    <div class="col-7">
+                                        <input type="text" class="form-control item-name" placeholder="اسم المنتج" required>
+                                    </div>
+                                    <div class="col-3">
+                                        <input type="number" class="form-control item-qty" placeholder="الكمية" min="1" value="1" required>
+                                    </div>
+                                    <div class="col-2">
+                                        <button type="button" class="btn btn-danger btn-sm" onclick="removeItem(this)">حذف</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="addItem()">+ إضافة منتج</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" onclick="createInvoice()">إنشاء الفاتورة</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="bidModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">تقديم عرض سعر</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="bidItems"></div>
+                    <hr>
+                    <div class="row">
+                        <div class="col">
+                            <strong>الإجمالي: <span id="bidTotal">0</span> ريال</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-success" onclick="submitBid()">تقديم العرض</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="viewBidsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">عروض الأسعار</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="bidsList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentUser = null;
+        let currentInvoiceId = null;
+        let currentItems = [];
+
+        async function checkAuth() {
+            const response = await fetch('/api/user');
+            const data = await response.json();
+            if (!data.success) {
+                window.location.href = '/login.html';
+                return;
+            }
+            currentUser = data.user;
+            document.getElementById('userName').textContent = 'مرحباً ' + currentUser.name;
+            showRoleSection();
+            loadInvoices();
+        }
+
+        function showRoleSection() {
+            document.getElementById('grocerySection').classList.add('d-none');
+            document.getElementById('merchantSection').classList.add('d-none');
+            document.getElementById('adminSection').classList.add('d-none');
+            
+            if (currentUser.role === 'grocery') {
+                document.getElementById('grocerySection').classList.remove('d-none');
+            } else if (currentUser.role === 'merchant') {
+                document.getElementById('merchantSection').classList.remove('d-none');
+            } else if (currentUser.role === 'admin') {
+                document.getElementById('adminSection').classList.remove('d-none');
+                loadUsers();
+            }
+        }
+
+        async function loadInvoices() {
+            const response = await fetch('/api/invoices');
+            const data = await response.json();
+            if (!data.success) return;
+
+            const invoices = data.invoices;
+            
+            if (currentUser.role === 'grocery') {
+                renderGroceryInvoices(invoices);
+            } else if (currentUser.role === 'merchant') {
+                renderMerchantInvoices(invoices);
+            } else {
+                renderAdminInvoices(invoices);
+            }
+        }
+
+        function renderGroceryInvoices(invoices) {
+            const container = document.getElementById('groceryInvoices');
+            if (invoices.length === 0) {
+                container.innerHTML = '<div class="col-12"><div class="alert alert-info">لا توجد فواتير بعد</div></div>';
+                return;
+            }
+            container.innerHTML = invoices.map(inv => `
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between">
+                            <span>فاتورة #${inv.id.slice(-4)}</span>
+                            <span class="badge ${getStatusBadge(inv.status)}">${getStatusText(inv.status)}</span>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>المنتجات:</strong></p>
+                            <ul>${inv.items.map(i => `<li>${i.name} (${i.quantity})</li>`).join('')}</ul>
+                            ${inv.lowestPrice ? `<p><strong>أقل سعر:</strong> ${inv.lowestPrice} ريال</p>` : ''}
+                            ${inv.status === 'priced' ? `<button class="btn btn-info btn-sm" onclick="viewBids('${inv.id}')">عرض العروض</button>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderMerchantInvoices(invoices) {
+            const container = document.getElementById('merchantInvoices');
+            const pending = invoices.filter(i => i.status === 'pending' || i.status === 'priced');
+            if (pending.length === 0) {
+                container.innerHTML = '<div class="col-12"><div class="alert alert-info">لا توجد فواتير متاحة</div></div>';
+                return;
+            }
+            container.innerHTML = pending.map(inv => `
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between">
+                            <span>طلب من ${inv.groceryName}</span>
+                            <span class="badge ${getStatusBadge(inv.status)}">${getStatusText(inv.status)}</span>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>العنوان:</strong> ${inv.address}</p>
+                            <p><strong>المنتجات:</strong></p>
+                            <ul>${inv.items.map(i => `<li>${i.name} (${i.quantity})</li>`).join('')}</ul>
+                            <button class="btn btn-primary btn-sm" onclick="openBidModal('${inv.id}', ${JSON.stringify(inv.items).replace(/"/g, '&quot;')})">تقديم عرض سعر</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderAdminInvoices(invoices) {
+            const container = document.getElementById('adminInvoices');
+            if (invoices.length === 0) {
+                container.innerHTML = '<div class="col-12"><div class="alert alert-info">لا توجد فواتير</div></div>';
+                return;
+            }
+            container.innerHTML = invoices.map(inv => `
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between">
+                            <span>${inv.groceryName}</span>
+                            <span class="badge ${getStatusBadge(inv.status)}">${getStatusText(inv.status)}</span>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>المنتجات:</strong></p>
+                            <ul>${inv.items.map(i => `<li>${i.name} (${i.quantity})</li>`).join('')}</ul>
+                            ${inv.lowestPrice ? `<p><strong>أقل سعر:</strong> ${inv.lowestPrice} ريال</p>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadUsers() {
+            const response = await fetch('/api/users');
+            const data = await response.json();
+            if (!data.success) return;
+            
+            const container = document.getElementById('usersList');
+            container.innerHTML = data.users.map(user => `
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5>${user.name}</h5>
+                            <p><strong>الهاتف:</strong> ${user.phone}</p>
+                            <p><strong>النوع:</strong> ${getRoleText(user.role)}</p>
+                            <p><strong>العنوان:</strong> ${user.address}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getStatusBadge(status) {
+            switch(status) {
+                case 'pending': return 'bg-warning';
+                case 'priced': return 'bg-info';
+                case 'approved': return 'bg-success';
+                default: return 'bg-secondary';
+            }
+        }
+
+        function getStatusText(status) {
+            switch(status) {
+                case 'pending': return 'قيد الانتظار';
+                case 'priced': return 'تم التسعير';
+                case 'approved': return 'موافق عليه';
+                default: return status;
+            }
+        }
+
+        function getRoleText(role) {
+            switch(role) {
+                case 'grocery': return 'بقالة';
+                case 'merchant': return 'تاجر جملة';
+                case 'admin': return 'مسؤول';
+                default: return role;
+            }
+        }
+
+        function addItem() {
+            const itemsList = document.getElementById('itemsList');
+            const newRow = document.createElement('div');
+            newRow.className = 'row mb-2 item-row';
+            newRow.innerHTML = `
+                <div class="col-7">
+                    <input type="text" class="form-control item-name" placeholder="اسم المنتج" required>
+                </div>
+                <div class="col-3">
+                    <input type="number" class="form-control item-qty" placeholder="الكمية" min="1" value="1" required>
+                </div>
+                <div class="col-2">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removeItem(this)">حذف</button>
+                </div>
+            `;
+            itemsList.appendChild(newRow);
+        }
+
+        function removeItem(btn) {
+            const rows = document.querySelectorAll('.item-row');
+            if (rows.length > 1) {
+                btn.closest('.item-row').remove();
+            }
+        }
+
+        async function createInvoice() {
+            const phone = document.getElementById('invoicePhone').value;
+            const address = document.getElementById('invoiceAddress').value;
+            const itemRows = document.querySelectorAll('.item-row');
+            const items = [];
+            
+            itemRows.forEach(row => {
+                const name = row.querySelector('.item-name').value;
+                const quantity = parseInt(row.querySelector('.item-qty').value);
+                if (name && quantity) {
+                    items.push({ name, quantity });
+                }
+            });
+
+            if (items.length === 0) {
+                alert('يرجى إضافة منتج واحد على الأقل');
+                return;
+            }
+
+            const response = await fetch('/api/invoices', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone, address, items })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                bootstrap.Modal.getInstance(document.getElementById('createInvoiceModal')).hide();
+                document.getElementById('invoiceForm').reset();
+                loadInvoices();
+            }
+        }
+
+        function openBidModal(invoiceId, items) {
+            currentInvoiceId = invoiceId;
+            currentItems = items;
+            const container = document.getElementById('bidItems');
+            container.innerHTML = items.map((item, index) => `
+                <div class="row mb-2">
+                    <div class="col-6">${item.name} (${item.quantity})</div>
+                    <div class="col-6">
+                        <input type="number" class="form-control item-price" data-index="${index}" placeholder="السعر" min="0" onchange="calculateTotal()">
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('bidTotal').textContent = '0';
+            new bootstrap.Modal(document.getElementById('bidModal')).show();
+        }
+
+        function calculateTotal() {
+            const prices = document.querySelectorAll('.item-price');
+            let total = 0;
+            prices.forEach((input, index) => {
+                const price = parseFloat(input.value) || 0;
+                total += price * currentItems[index].quantity;
+            });
+            document.getElementById('bidTotal').textContent = total;
+        }
+
+        async function submitBid() {
+            const prices = document.querySelectorAll('.item-price');
+            const itemPrices = [];
+            let total = 0;
+            
+            prices.forEach((input, index) => {
+                const price = parseFloat(input.value) || 0;
+                itemPrices.push({ name: currentItems[index].name, price });
+                total += price * currentItems[index].quantity;
+            });
+
+            const response = await fetch('/api/bids', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    invoiceId: currentInvoiceId,
+                    totalPrice: total,
+                    itemPrices
+                })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                bootstrap.Modal.getInstance(document.getElementById('bidModal')).hide();
+                loadInvoices();
+                alert('تم تقديم العرض بنجاح');
+            }
+        }
+
+        async function viewBids(invoiceId) {
+            const response = await fetch(`/api/bids/${invoiceId}`);
+            const data = await response.json();
+            
+            const container = document.getElementById('bidsList');
+            if (data.bids.length === 0) {
+                container.innerHTML = '<div class="alert alert-info">لا توجد عروض بعد</div>';
+            } else {
+                container.innerHTML = data.bids.map(bid => `
+                    <div class="card mb-2">
+                        <div class="card-body">
+                            <h6>${bid.merchantName}</h6>
+                            <p><strong>السعر الإجمالي:</strong> ${bid.totalPrice} ريال</p>
+                            <button class="btn btn-success btn-sm" onclick="approveBid('${invoiceId}', '${bid.merchantId}')">قبول العرض</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            new bootstrap.Modal(document.getElementById('viewBidsModal')).show();
+        }
+
+        async function approveBid(invoiceId, merchantId) {
+            const response = await fetch(`/api/invoices/${invoiceId}/approve`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ merchantId })
+            });
+            
+            if (response.ok) {
+                bootstrap.Modal.getInstance(document.getElementById('viewBidsModal')).hide();
+                loadInvoices();
+                alert('تمت الموافقة على العرض');
+            }
+        }
+
+        async function logout() {
+            await fetch('/api/logout', { method: 'POST' });
+            window.location.href = '/login.html';
+        }
+
+        checkAuth();
+    </script>
+</body>
+</html>
