@@ -2,64 +2,84 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل جديد - إدارة الطلبات</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#4361ee">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="/manifest.json">
+    <title>Order Pro - تسجيل جديد</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <div class="row justify-content-center align-items-center min-vh-100">
-            <div class="col-md-6 col-lg-5">
-                <div class="card shadow">
-                    <div class="card-header bg-success text-white text-center">
-                        <h4>تسجيل حساب جديد</h4>
-                    </div>
-                    <div class="card-body">
-                        <form id="registerForm">
-                            <div class="mb-3">
-                                <label for="name" class="form-label">الاسم</label>
-                                <input type="text" class="form-control" id="name" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="phone" class="form-label">رقم الهاتف</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">967+</span>
-                                    <input type="tel" class="form-control" id="phone" placeholder="77XXXXXXX" required>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="role" class="form-label">نوع الحساب</label>
-                                <select class="form-select" id="role" required>
-                                    <option value="grocery">بقالة</option>
-                                    <option value="merchant">تاجر جملة</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="address" class="form-label">العنوان</label>
-                                <textarea class="form-control" id="address" rows="2" required></textarea>
-                            </div>
-                            <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-success">تسجيل</button>
-                            </div>
-                        </form>
-                        <div class="text-center mt-3">
-                            <a href="login.html">لديك حساب؟ سجل دخول</a>
-                        </div>
-                        <div id="message" class="alert mt-3 d-none"></div>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-logo" style="background: linear-gradient(135deg, #06d6a0 0%, #4361ee 100%);">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <h1 class="auth-title">إنشاء حساب</h1>
+            <p class="auth-subtitle">انضم إلى منصة Order Pro الآن</p>
+            
+            <form id="registerForm">
+                <div class="form-group">
+                    <label class="form-label">الاسم الكامل</label>
+                    <input type="text" class="form-control" id="name" placeholder="أدخل اسمك" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">رقم الهاتف</label>
+                    <div class="input-group">
+                        <input type="tel" class="form-control" id="phone" placeholder="771234567" required>
+                        <span class="input-prefix">967+</span>
                     </div>
                 </div>
+                
+                <div class="form-group">
+                    <label class="form-label">نوع الحساب</label>
+                    <div class="select-wrapper">
+                        <select class="form-control" id="role" required>
+                            <option value="grocery">بقالة / متجر تجزئة</option>
+                            <option value="merchant">تاجر جملة / مورد</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">العنوان</label>
+                    <input type="text" class="form-control" id="address" placeholder="المدينة - الحي - الشارع" required>
+                </div>
+                
+                <button type="submit" class="btn btn-success" id="registerBtn">
+                    <span>إنشاء الحساب</span>
+                    <i class="fas fa-check"></i>
+                </button>
+            </form>
+            
+            <div class="auth-link">
+                لديك حساب؟ <a href="login.html">سجل دخول</a>
             </div>
         </div>
     </div>
+
+    <div class="toast" id="toast"></div>
+
     <script>
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.innerHTML = `<i class="fas fa-${isError ? 'times-circle' : 'check-circle'}"></i> ${message}`;
+            toast.className = 'toast show' + (isError ? ' error' : '');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('name').value;
             const phone = document.getElementById('phone').value;
             const role = document.getElementById('role').value;
             const address = document.getElementById('address').value;
-            const messageDiv = document.getElementById('message');
+            const btn = document.getElementById('registerBtn');
+            
+            btn.innerHTML = '<div class="spinner" style="width:20px;height:20px;border-width:2px;"></div>';
+            btn.disabled = true;
             
             try {
                 const response = await fetch('/api/register', {
@@ -70,16 +90,17 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    window.location.href = '/home.html';
+                    showToast('تم إنشاء الحساب بنجاح');
+                    setTimeout(() => window.location.href = '/home.html', 500);
                 } else {
-                    messageDiv.className = 'alert alert-danger mt-3';
-                    messageDiv.textContent = data.message || 'فشل التسجيل';
-                    messageDiv.classList.remove('d-none');
+                    showToast(data.message || 'فشل التسجيل', true);
+                    btn.innerHTML = '<span>إنشاء الحساب</span><i class="fas fa-check"></i>';
+                    btn.disabled = false;
                 }
             } catch (error) {
-                messageDiv.className = 'alert alert-danger mt-3';
-                messageDiv.textContent = 'حدث خطأ في الاتصال';
-                messageDiv.classList.remove('d-none');
+                showToast('حدث خطأ في الاتصال', true);
+                btn.innerHTML = '<span>إنشاء الحساب</span><i class="fas fa-check"></i>';
+                btn.disabled = false;
             }
         });
     </script>
