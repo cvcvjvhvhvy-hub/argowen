@@ -32,39 +32,37 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDummyKeyForLocalTesting123456789',
-    appId: '1:123456789:web:abcdef123456',
-    messagingSenderId: '123456789',
-    projectId: 'order-management-test',
-    authDomain: 'order-management-test.firebaseapp.com',
-    storageBucket: 'order-management-test.appspot.com',
+    apiKey: 'your-web-api-key',
+    appId: 'your-web-app-id',
+    messagingSenderId: 'your-sender-id',
+    projectId: 'your-project-id',
+    authDomain: 'your-project-id.firebaseapp.com',
+    storageBucket: 'your-project-id.appspot.com',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDummyKeyForLocalTesting123456789',
-    appId: '1:123456789:android:abcdef123456',
-    messagingSenderId: '123456789',
-    projectId: 'order-management-test',
-    storageBucket: 'order-management-test.appspot.com',
+    apiKey: 'your-android-api-key',
+    appId: 'your-android-app-id',
+    messagingSenderId: 'your-sender-id',
+    projectId: 'your-project-id',
+    storageBucket: 'your-project-id.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDummyKeyForLocalTesting123456789',
-    appId: '1:123456789:ios:abcdef123456',
-    messagingSenderId: '123456789',
-    projectId: 'order-management-test',
-    storageBucket: 'order-management-test.appspot.com',
-    iosClientId: '123456789-abcdef.apps.googleusercontent.com',
+    apiKey: 'your-ios-api-key',
+    appId: 'your-ios-app-id',
+    messagingSenderId: 'your-sender-id',
+    projectId: 'your-project-id',
+    storageBucket: 'your-project-id.appspot.com',
     iosBundleId: 'com.example.orderManagementApp',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyDummyKeyForLocalTesting123456789',
-    appId: '1:123456789:macos:abcdef123456',
-    messagingSenderId: '123456789',
-    projectId: 'order-management-test',
-    storageBucket: 'order-management-test.appspot.com',
-    iosClientId: '123456789-abcdef.apps.googleusercontent.com',
+    apiKey: 'your-macos-api-key',
+    appId: 'your-macos-app-id',
+    messagingSenderId: 'your-sender-id',
+    projectId: 'your-project-id',
+    storageBucket: 'your-project-id.appspot.com',
     iosBundleId: 'com.example.orderManagementApp',
   );
 }
