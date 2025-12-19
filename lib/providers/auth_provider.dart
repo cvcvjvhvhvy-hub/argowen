@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
-import '../models/user.dart';
 
-class AuthProvider with ChangeNotifier {
-  User? _user;
-  final AuthService _authService = AuthService();
+class AuthProvider extends ChangeNotifier {
+  String? _currentUser;
+  
+  String? get currentUser => _currentUser;
+  bool get isLoggedIn => _currentUser != null;
 
-  User? get user => _user;
-
-  Future<void> loadUser() async {
-    _user = await _authService.getCurrentUser();
+  void login(String phone, String password) {
+    _currentUser = phone;
     notifyListeners();
   }
 
-  Future<void> signOut() async {
-    await _authService.signOut();
-    _user = null;
+  void register(String phone, String password, String name) {
+    _currentUser = phone;
+    notifyListeners();
+  }
+
+  void logout() {
+    _currentUser = null;
     notifyListeners();
   }
 }
