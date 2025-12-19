@@ -1,3 +1,4 @@
+# Updated configuration without tests
 workflows:
   android-workflow:
     name: Android Workflow
