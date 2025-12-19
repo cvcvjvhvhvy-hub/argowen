@@ -95,7 +95,6 @@ class RegisterScreenState extends State<RegisterScreen> {
                   if (value == null || value.number.length != 9) return 'Enter valid 9 digit Yemeni number';
                   return null;
                 },
-                initialValue: null,
               ),
               DropdownButtonFormField<String>(
                 value: _role,

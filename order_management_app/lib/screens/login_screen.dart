@@ -6,10 +6,10 @@ class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  LoginScreenState createState() => LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class LoginScreenState extends State<LoginScreen> {
   final _codeController = TextEditingController();
   String _phoneNumber = '';
   String _verificationId = '';
@@ -30,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
         _login();
       },
       (error) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message!)));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message ?? 'Authentication error')));
       },
     );
   }

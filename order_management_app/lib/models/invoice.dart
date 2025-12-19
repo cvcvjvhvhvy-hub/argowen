@@ -25,16 +25,16 @@ class Invoice {
 
   factory Invoice.fromMap(Map<String, dynamic> map) {
     return Invoice(
-      id: map['id'],
-      groceryId: map['groceryId'],
-      groceryName: map['groceryName'],
-      phone: map['phone'],
-      address: map['address'],
-      items: (map['items'] as List).map((e) => InvoiceItem.fromMap(e)).toList(),
+      id: map['id'] ?? '',
+      groceryId: map['groceryId'] ?? '',
+      groceryName: map['groceryName'] ?? '',
+      phone: map['phone'] ?? '',
+      address: map['address'] ?? '',
+      items: (map['items'] as List? ?? []).map((e) => InvoiceItem.fromMap(e)).toList(),
       status: map['status'] ?? 'pending',
       lowestPrice: map['lowestPrice']?.toDouble(),
       selectedMerchantId: map['selectedMerchantId'],
-      createdAt: DateTime.parse(map['createdAt']),
+      createdAt: map['createdAt'] != null ? DateTime.parse(map['createdAt']) : DateTime.now(),
     );
   }
 
@@ -61,7 +61,10 @@ class InvoiceItem {
   InvoiceItem({required this.name, required this.quantity});
 
   factory InvoiceItem.fromMap(Map<String, dynamic> map) {
-    return InvoiceItem(name: map['name'], quantity: map['quantity']);
+    return InvoiceItem(
+      name: map['name'] ?? '',
+      quantity: map['quantity'] ?? 0,
+    );
   }
 
   Map<String, dynamic> toMap() {
