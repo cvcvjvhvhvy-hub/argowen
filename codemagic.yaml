@@ -5,10 +5,6 @@ workflows:
     instance_type: linux_x2
     working_directory: order_management_app
     environment:
-      android_signing:
-        - keystore_reference
-      groups:
-        - google_play
       vars:
         PACKAGE_NAME: "com.example.order_management_app"
       flutter: stable
@@ -48,7 +44,3 @@ workflows:
         notify:
           success: true
           failure: true
-      google_play:
-        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
-        track: internal
-        submit_as_draft: true
