@@ -1,23 +1,68 @@
 workflows:
-  flutter-android:
-    name: Flutter Android
+  flutter-test-build:
+    name: Flutter Test APK Build
     max_build_duration: 60
+    instance_type: mac_mini_m1
     environment:
+      vars:
+        PACKAGE_NAME: "com.example.order_management_app"
       flutter: stable
       xcode: latest
       cocoapods: default
     scripts:
+      - name: Set up local.properties
+        script: |
+          echo "flutter.sdk=$HOME/programs/flutter" > "$CM_BUILD_DIR/android/local.properties"
+      - name: Use test version without Firebase
+        script: |
+          cp lib/main_no_firebase.dart lib/main.dart
       - name: Get Flutter packages
         script: |
           flutter packages pub get
-      - name: Build APK
+      - name: Build Test APK
         script: |
-          flutter build apk --release
+          flutter build apk --release --target-platform android-arm,android-arm64
     artifacts:
       - build/**/outputs/**/*.apk
-      - build/**/outputs/**/mapping.txt
-      - flutter_drive.log
     publishing:
       email:
         recipients:
-          - user@example.com
+          - developer@example.com
+        notify:
+          success: true
+          failure: true
+
+  flutter-production:
+    name: Flutter Production Build
+    max_build_duration: 60
+    instance_type: mac_mini_m1
+    environment:
+      vars:
+        PACKAGE_NAME: "com.example.order_management_app"
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Set up local.properties
+        script: |
+          echo "flutter.sdk=$HOME/programs/flutter" > "$CM_BUILD_DIR/android/local.properties"
+      - name: Get Flutter packages
+        script: |
+          flutter packages pub get
+      - name: Build Production APK
+        script: |
+          flutter build apk --release --target-platform android-arm,android-arm64
+      - name: Build AAB
+        script: |
+          flutter build appbundle --release
+    artifacts:
+      - build/**/outputs/**/*.apk
+      - build/**/outputs/**/*.aab
+      - build/**/outputs/**/mapping.txt
+    publishing:
+      email:
+        recipients:
+          - developer@example.com
+        notify:
+          success: true
+          failure: true
