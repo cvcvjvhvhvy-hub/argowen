@@ -1,9 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/user.dart';
 
 class AuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final firebase_auth.FirebaseAuth _auth = firebase_auth.FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   
   FirebaseAuth get auth => _auth;
@@ -12,11 +12,11 @@ class AuthService {
     String phoneNumber,
     Function(String) codeSent,
     Function(String) verificationCompleted,
-    Function(FirebaseAuthException) verificationFailed,
+    Function(firebase_auth.FirebaseAuthException) verificationFailed,
   ) async {
     await _auth.verifyPhoneNumber(
       phoneNumber: phoneNumber,
-      verificationCompleted: (PhoneAuthCredential credential) async {
+      verificationCompleted: (firebase_auth.PhoneAuthCredential credential) async {
         await _auth.signInWithCredential(credential);
         verificationCompleted('Auto verified');
       },
@@ -28,8 +28,8 @@ class AuthService {
     );
   }
 
-  Future<UserCredential> signInWithSmsCode(String verificationId, String smsCode) async {
-    PhoneAuthCredential credential = PhoneAuthProvider.credential(
+  Future<firebase_auth.UserCredential> signInWithSmsCode(String verificationId, String smsCode) async {
+    firebase_auth.PhoneAuthCredential credential = firebase_auth.PhoneAuthProvider.credential(
       verificationId: verificationId,
       smsCode: smsCode,
     );
@@ -41,7 +41,7 @@ class AuthService {
   }
 
   Future<User?> getCurrentUser() async {
-    User? firebaseUser = _auth.currentUser;
+    firebase_auth.User? firebaseUser = _auth.currentUser;
     if (firebaseUser != null) {
       DocumentSnapshot doc = await _firestore.collection('users').doc(firebaseUser.uid).get();
       if (doc.exists) {
