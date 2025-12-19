@@ -7,10 +7,10 @@ class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
   @override
-  _RegisterScreenState createState() => _RegisterScreenState();
+  RegisterScreenState createState() => RegisterScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
+class RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _addressController = TextEditingController();
@@ -36,7 +36,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           _register();
         },
         (error) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message!)));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message ?? 'Authentication error')));
         },
       );
     }
@@ -52,15 +52,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void _register() async {
-    User user = User(
-      id: _authService.auth.currentUser!.uid,
-      name: _nameController.text,
-      phone: _phoneNumber,
-      role: _role,
-      address: _addressController.text,
-    );
-    await _authService.registerUser(user);
-    Navigator.pushReplacementNamed(context, '/home');
+    final currentUser = _authService.auth.currentUser;
+    if (currentUser != null) {
+      User user = User(
+        id: currentUser.uid,
+        name: _nameController.text,
+        phone: _phoneNumber,
+        role: _role,
+        address: _addressController.text,
+      );
+      await _authService.registerUser(user);
+      Navigator.pushReplacementNamed(context, '/home');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Authentication failed. Please try again.')),
+      );
+    }
   }
 
   @override

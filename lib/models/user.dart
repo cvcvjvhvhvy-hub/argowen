@@ -9,10 +9,10 @@ class User {
 
   factory User.fromMap(Map<String, dynamic> map) {
     return User(
-      id: map['id'],
-      name: map['name'],
-      phone: map['phone'],
-      role: map['role'],
+      id: map['id'] ?? '',
+      name: map['name'] ?? '',
+      phone: map['phone'] ?? '',
+      role: map['role'] ?? 'grocery',
       address: map['address'],
     );
   }

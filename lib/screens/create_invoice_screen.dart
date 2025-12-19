@@ -8,37 +8,54 @@ class CreateInvoiceScreen extends StatefulWidget {
   const CreateInvoiceScreen({super.key});
 
   @override
-  _CreateInvoiceScreenState createState() => _CreateInvoiceScreenState();
+  CreateInvoiceScreenState createState() => CreateInvoiceScreenState();
 }
 
-class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
+class CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
   final List<InvoiceItem> _items = [];
   final _nameController = TextEditingController();
   final _quantityController = TextEditingController();
 
   void _addItem() {
     if (_nameController.text.isNotEmpty && _quantityController.text.isNotEmpty) {
-      setState(() {
-        _items.add(InvoiceItem(name: _nameController.text, quantity: int.parse(_quantityController.text)));
-        _nameController.clear();
-        _quantityController.clear();
-      });
+      final quantity = int.tryParse(_quantityController.text);
+      if (quantity != null && quantity > 0) {
+        setState(() {
+          _items.add(InvoiceItem(name: _nameController.text, quantity: quantity));
+          _nameController.clear();
+          _quantityController.clear();
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please enter a valid positive quantity')),
+        );
+      }
     }
   }
 
   void _submit() async {
     if (_items.isNotEmpty) {
-      final user = context.read<AuthProvider>().user!;
-      final invoice = Invoice(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        groceryId: user.id,
-        groceryName: user.name,
-        phone: user.phone,
-        address: user.address!,
-        items: _items,
+      final user = context.read<AuthProvider>().user;
+      if (user != null && user.address != null && user.address!.isNotEmpty) {
+        final invoice = Invoice(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          groceryId: user.id,
+          groceryName: user.name,
+          phone: user.phone,
+          address: user.address!,
+          items: _items,
+        );
+        await FirestoreService().addInvoice(invoice);
+        Navigator.pop(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please ensure your profile has a valid address')),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please add at least one item')),
       );
-      await FirestoreService().addInvoice(invoice);
-      Navigator.pop(context);
     }
   }
 

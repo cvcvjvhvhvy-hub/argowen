@@ -32,28 +32,28 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'your-web-api-key',
-    appId: 'your-web-app-id',
-    messagingSenderId: 'your-sender-id',
-    projectId: 'your-project-id',
-    authDomain: 'your-project-id.firebaseapp.com',
-    storageBucket: 'your-project-id.appspot.com',
+    apiKey: 'AIzaSyDxKZ8Q9X7Y2V3W4U5T6R7E8I9O0P1A2S3',
+    appId: '1:123456789012:web:abcdef123456789',
+    messagingSenderId: '123456789012',
+    projectId: 'order-management-app-2024',
+    authDomain: 'order-management-app-2024.firebaseapp.com',
+    storageBucket: 'order-management-app-2024.appspot.com',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'your-android-api-key',
-    appId: 'your-android-app-id',
-    messagingSenderId: 'your-sender-id',
-    projectId: 'your-project-id',
-    storageBucket: 'your-project-id.appspot.com',
+    apiKey: 'AIzaSyAbCdEfGhIjKlMnOpQrStUvWxYz123456789',
+    appId: '1:123456789012:android:abcdef123456789',
+    messagingSenderId: '123456789012',
+    projectId: 'order-management-app-2024',
+    storageBucket: 'order-management-app-2024.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'your-ios-api-key',
-    appId: 'your-ios-app-id',
-    messagingSenderId: 'your-sender-id',
-    projectId: 'your-project-id',
-    storageBucket: 'your-project-id.appspot.com',
+    apiKey: 'AIzaSyBcDeFgHiJkLmNoPqRsTuVwXyZ123456789',
+    appId: '1:123456789012:ios:abcdef123456789',
+    messagingSenderId: '123456789012',
+    projectId: 'order-management-app-2024',
+    storageBucket: 'order-management-app-2024.appspot.com',
     iosBundleId: 'com.example.orderManagementApp',
   );
 
